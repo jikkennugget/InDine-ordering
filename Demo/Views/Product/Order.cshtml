@@ -1,0 +1,622 @@
+﻿@model IEnumerable<Order>
+
+@{
+    ViewBag.Title = "Order Management";
+    var orders = Model.ToList();
+    var paidOrders = orders.Where(o => o.Paid).ToList();
+    var unpaidOrders = orders.Where(o => !o.Paid).ToList();
+    string selected = (string)ViewBag.Status;
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/product-index.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/maintain.css" asp-append-version="true">
+    <style>
+        /* Enhanced category/status card styling */
+        .category-card {
+            text-decoration: none !important;
+            color: inherit !important;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .category-card:hover {
+            text-decoration: none !important;
+            color: inherit !important;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+            border-color: #cbd5e1 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-card:visited {
+            text-decoration: none !important;
+            color: inherit !important;
+        }
+        
+        /* Active status styling - stays in hover state */
+        .category-card.active {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+            border-color: #cbd5e1 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-card.active .category-name {
+            color: #1e293b !important;
+            font-weight: 600;
+        }
+        
+        .category-card.active .category-id {
+            color: #64748b !important;
+        }
+        
+        /* Modern pagination styling */
+        .pagination-container {
+            margin-top: 40px;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .pagination-info {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #1e293b;
+            font-size: 15px;
+            font-weight: 500;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+            background-clip: unset;
+            text-shadow: none;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .pagination-info .icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 3px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .pagination-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .pagination {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .page-item {
+            display: flex;
+        }
+        
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            height: 44px;
+            padding: 0 16px;
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .page-link:hover {
+            background: #f1f5f9;
+            color: #334155;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+            font-weight: 600;
+        }
+        
+        .page-item.disabled .page-link {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .page-item.disabled .page-link:hover {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #cbd5e1;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Special styling for Previous/Next buttons */
+        .page-link:has(span:contains("Previous")),
+        .page-link:has(span:contains("Next")) {
+            min-width: 100px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        /* Ellipsis styling */
+        .page-item.disabled .page-link:not(.disabled) {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: default;
+        }
+        
+        .page-item.disabled .page-link:not(.disabled):hover {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            transform: none;
+        }
+        
+        /* Loading state for pagination */
+        .grid.loading {
+            position: relative;
+        }
+        
+        .grid.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .grid.loading::before {
+            content: 'Loading orders...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1001;
+        }
+        
+        /* Responsive pagination */
+        @@media (max-width: 768px) {
+            .pagination-container {
+                margin-top: 32px;
+            }
+            
+            .pagination-info {
+                font-size: 14px;
+                margin-bottom: 20px;
+                padding: 12px 20px;
+            }
+            
+            .pagination-nav {
+                padding: 6px;
+            }
+            
+            .page-link {
+                min-width: 40px;
+                height: 40px;
+                padding: 0 12px;
+                font-size: 13px;
+                border-radius: 8px;
+            }
+            
+            .pagination {
+                gap: 3px;
+            }
+            
+            /* Special styling for Previous/Next buttons on mobile */
+            .page-link:has(span:contains("Previous")),
+            .page-link:has(span:contains("Next")) {
+                min-width: 80px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Responsive search section */
+        @@media (max-width: 768px) {
+            .search-section {
+                padding: 16px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .search-section > div {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            
+            .search-section input {
+                max-width: none !important;
+            }
+            
+            .search-section button {
+                width: 100% !important;
+            }
+        }
+        
+        @@media (max-width: 480px) {
+            .pagination-info {
+                font-size: 13px;
+                padding: 10px 16px;
+            }
+            
+            .pagination-nav {
+                padding: 4px;
+            }
+            
+            .page-link {
+                min-width: 36px;
+                height: 36px;
+                padding: 0 10px;
+                font-size: 12px;
+                border-radius: 6px;
+            }
+            
+            .pagination {
+                gap: 2px;
+            }
+            
+            /* Show only essential pagination on mobile */
+            .page-item:not(.active):not(:first-child):not(:last-child):not(:nth-child(2)):not(:nth-last-child(2)) {
+                display: none;
+            }
+            
+            /* Special styling for Previous/Next buttons on small mobile */
+            .page-link:has(span:contains("Previous")),
+            .page-link:has(span:contains("Next")) {
+                min-width: 70px;
+                font-size: 11px;
+            }
+        }
+        
+        /* Animation for page transitions */
+        .products {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Enhanced loading state */
+        .grid.loading::before {
+            content: 'Loading orders...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            z-index: 1001;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @@keyframes pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+    </style>
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <!-- Sales Statistics Section - Admin Only -->
+    <div class="stats-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #cbd5e1;">
+        <h3 style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; font-weight: 600; text-align: center;">📊 Sales Overview</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <!-- Total Sales -->
+            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #10b981;">
+                <div style="font-size: 32px; margin-bottom: 8px;">💰</div>
+                <div style="font-size: 24px; font-weight: 700; color: #10b981; margin-bottom: 4px;">RM @ViewBag.TotalSales.ToString("F2")</div>
+                <div style="font-size: 14px; color: #64748b; font-weight: 500;">Total Sales</div>
+            </div>
+            
+            <!-- Total Paid Orders -->
+            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #3b82f6;">
+                <div style="font-size: 32px; margin-bottom: 8px;">✅</div>
+                <div style="font-size: 24px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">@ViewBag.TotalPaidOrders</div>
+                <div style="font-size: 14px; color: #64748b; font-weight: 500;">Paid Orders</div>
+            </div>
+            
+            <!-- Total Unpaid Orders -->
+            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #f59e0b;">
+                <div style="font-size: 32px; margin-bottom: 8px;">⏳</div>
+                <div style="font-size: 24px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">@ViewBag.TotalUnpaidOrders</div>
+                <div style="font-size: 14px; color: #64748b; font-weight: 500;">Unpaid Orders</div>
+            </div>
+            
+            <!-- Payment Methods -->
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #8b5cf6;">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">💳</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #8b5cf6;">Payment Methods</div>
+                </div>
+                @if (ViewBag.PaymentMethods != null && ((IEnumerable<dynamic>)ViewBag.PaymentMethods).Any())
+                {
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        @foreach (var method in (IEnumerable<dynamic>)ViewBag.PaymentMethods)
+                        {
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <span style="font-size: 14px; font-weight: 500; color: #374151;">@method.Method</span>
+                                <span style="font-size: 14px; font-weight: 600; color: #8b5cf6; background: #ede9fe; padding: 2px 8px; border-radius: 12px;">@method.Count</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div style="text-align: center; color: #9ca3af; font-size: 14px; font-style: italic;">No payment data available</div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Global Search Section -->
+<div class="search-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #cbd5e1;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 16px;">
+        <div style="position: relative; flex: 1; max-width: 400px;">
+            <input type="text" id="search-input" placeholder="Search orders by table number..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; transition: all 0.2s ease; background: white;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            <button type="button" id="search-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px; font-size: 16px;" title="Search">
+                🔍
+            </button>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; margin-top: 12px;">
+        <button type="button" id="clear-search" style="padding: 10px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            Clear Search
+        </button>
+    </div>
+</div>
+
+<div class="maintain">
+    <aside class="sidebar">
+        <h3>Order Status</h3>
+        <ul>
+            <li>
+                <a href="/Product/Order?status=unpaid" class="category-card @(selected == "unpaid" ? "active" : "")" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="category-info">
+                        <div class="category-id">Count: @unpaidOrders.Count</div>
+                        <div class="category-name">
+                            Unpaid Orders
+                        </div>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/Product/Order?status=paid" class="category-card @(selected == "paid" ? "active" : "")" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="category-info">
+                        <div class="category-id">Count: @paidOrders.Count</div>
+                        <div class="category-name">
+                            Paid Orders
+                        </div>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/Product/Order" class="category-card @(string.IsNullOrEmpty(selected) ? "active" : "")" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="category-info">
+                        <div class="category-id">Count: @orders.Count</div>
+                        <div class="category-name">
+                            All Orders
+                        </div>
+                    </div>
+                </a>
+            </li>
+        </ul>
+        @if (User.IsInRole("Admin"))
+        {
+            <form method="post" action="/Product/ResetAll" style="margin-top:20px;">
+                <button type="submit" class="add-category-btn" onclick="return confirm('Reset all orders? This action cannot be undone.')">🔄 Reset All Orders</button>
+            </form>
+        }
+    </aside>
+
+    <section class="grid">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h4 style="margin:0; color:#1e293b; font-size:18px; font-weight:600;">Orders</h4>
+        </div>
+        <div id="grid">
+            <partial name="_OrderGrid" />
+        </div>
+    </section>
+</div>
+
+@section foot {
+    <script>
+        // Ajax-load grid when clicking status links with loading state
+        $(document).on('click', 'a[href^="/Product/Order"]:not([href*="OrderDetail"])', function (e) {
+            const url = $(this).attr('href');
+            const clickedCard = $(this);
+            if (!url) return;
+            e.preventDefault();
+            
+            // Add loading state
+            $('.grid').addClass('loading');
+            
+            // Update active status immediately
+            $('.category-card').removeClass('active');
+            clickedCard.addClass('active');
+            
+            // Load content
+            $('#grid').load(url, function() {
+                // Remove loading state
+                $('.grid').removeClass('loading');
+            });
+        });
+        
+        // AJAX pagination functionality
+        $(document).on('click', '.pagination-link', function(e) {
+            e.preventDefault();
+            
+            const page = $(this).data('page');
+            const status = $(this).data('status');
+            
+            // Build URL with pagination parameters
+            let url = '/Product/Order';
+            const params = [];
+            
+            if (status) {
+                params.push(`status=${status}`);
+            }
+            if (page && page > 1) {
+                params.push(`page=${page}`);
+            }
+            
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            // Add loading state
+            $('.grid').addClass('loading');
+            
+            // Load content via AJAX
+            $('#grid').load(url, function() {
+                // Remove loading state
+                $('.grid').removeClass('loading');
+                
+                // Scroll to top of grid
+                $('html, body').animate({scrollTop: $('.grid').offset().top - 100}, 300);
+            });
+        });
+        
+        // Add smooth scroll to top when switching categories
+        $(document).on('click', 'a[href^="/Product/Order"]', function() {
+            $('html, body').animate({scrollTop: 0}, 300);
+        });
+        
+        // Search functionality
+        let searchTimeout;
+        
+        // Search input event handler
+        $('#search-input').on('input', function() {
+            const searchTerm = $(this).val().trim();
+            
+            // Clear previous timeout
+            clearTimeout(searchTimeout);
+            
+            // Debounce search - wait 300ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                performSearch(searchTerm);
+            }, 300);
+        });
+        
+        // Search button click
+        $('#search-btn').on('click', function() {
+            const searchTerm = $('#search-input').val().trim();
+            performSearch(searchTerm);
+        });
+        
+        // Enter key in search input
+        $('#search-input').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                const searchTerm = $(this).val().trim();
+                performSearch(searchTerm);
+            }
+        });
+        
+        // Clear search button
+        $('#clear-search').on('click', function() {
+            $('#search-input').val('');
+            clearSearch();
+        });
+        
+        // Perform search function
+        function performSearch(searchTerm) {
+            if (searchTerm.length === 0) {
+                clearSearch();
+                return;
+            }
+            
+            // Add loading state
+            $('#grid').html('<div class="loading">Searching orders...</div>');
+            
+            // Perform AJAX search
+            $.get('/Product/SearchOrders', { searchTerm: searchTerm }, function(data) {
+                $('#grid').html(data);
+            }).fail(function() {
+                $('#grid').html('<div class="empty-state"><h4>Search Error</h4><p>Failed to search orders. Please try again.</p></div>');
+            });
+        }
+        
+        // Clear search function
+        function clearSearch() {
+            $('#search-input').val('');
+            
+            // Reload the current status or show all orders
+            const currentStatus = $('.category-card.active').attr('href');
+            if (currentStatus) {
+                $('#grid').load(currentStatus);
+            } else {
+                // If no status is selected, load all orders
+                $('#grid').load('/Product/Order');
+            }
+        }
+    </script>
+}

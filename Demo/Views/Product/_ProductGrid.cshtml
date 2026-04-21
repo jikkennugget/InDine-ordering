@@ -1,0 +1,40 @@
+@model IEnumerable<Product>
+
+@if (Model.Any())
+{
+    <div class="products">
+        @foreach (var p in Model)
+        {
+            <div class="product">
+                <div class="product-image-container">
+                    <img src="@Url.Content(p.PhotoURL.StartsWith("~/") ? p.PhotoURL : $"~/products/{p.PhotoURL}")"
+                         alt="@p.Name"
+                         onerror="this.src='@Url.Content("~/images/photo.jpg")'; this.alt='No image available';">
+                    <div class="product-overlay">
+                        <a href="/Product/Edit/@p.Id" class="btn-overlay" title="Edit Product">✏️</a>
+                        <form method="post" action="/Product/Delete" style="display:inline">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="btn-overlay" onclick="return confirm('Delete this product?')" title="Delete Product">🗑️</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="meta">
+                    <div class="product-id">ID: @p.Id</div>
+                    <span class="name">@p.Name</span>
+                    <div class="category-id">Category: @p.CategoryId</div>
+                    <span class="price">RM @p.Price.ToString("F2")</span>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <h4>No products found</h4>
+        <p>This category doesn't have any products yet.</p>
+        <a href="/Product/Create?categoryId=@ViewBag.CategoryId" class="create-product-btn">+ Create First Product</a>
+    </div>
+}
+
+

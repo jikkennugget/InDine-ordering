@@ -1,0 +1,80 @@
+@model IEnumerable<Product>
+
+@{
+    ViewBag.Title = "Menu Maintenance";
+    var categories = (IEnumerable<ProductCategory>)ViewBag.Categories;
+    string selected = (string)ViewBag.CategoryId;
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/product-index.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/maintain.css" asp-append-version="true">
+}
+
+<div class="maintain">
+    <aside class="sidebar">
+        <h3>Categories</h3>
+        <ul>
+            @foreach (var c in categories)
+            {
+                var isActive = string.Equals(c.Id, selected, StringComparison.OrdinalIgnoreCase);
+                <li>
+                    <div class="category-card @(isActive ? "active" : "")" data-category-id="@c.Id">
+                        <div class="category-info">
+                            <div class="category-id">ID: @c.Id</div>
+                            <div class="category-name">
+                                @c.Name
+                            </div>
+                        </div>
+                        <div class="category-actions">
+                            <a href="/ProductCategory/Edit/@c.Id" class="btn" title="Edit Category">Edit</a>
+                            <form method="post" action="/ProductCategory/Delete" onsubmit="return confirm('Deleting this category will also delete ALL products within it. Continue?');" style="display:inline;">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                <button type="submit" class="btn" title="Delete Category">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+        <a href="/ProductCategory/Create" class="add-category-btn">+ Add Category</a>
+    </aside>
+
+    <section class="grid">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h4 style="margin:0; color:#1e293b; font-size:18px; font-weight:600;">Products</h4>
+            <a href="/Product/Create?categoryId=@selected" class="create-product-btn">+ Create Product</a>
+        </div>
+        <div id="grid">
+            <partial name="_ProductGrid" />
+        </div>
+    </section>
+</div>
+
+@section foot {
+    <script>
+        // Ajax-load grid when clicking category cards with loading state
+        $(document).on('click', '.category-card', function (e) {
+            const categoryId = $(this).data('category-id');
+            const url = `/Product/Maintain?categoryId=${categoryId}`;
+            
+            // Add loading state
+            $('.grid').addClass('loading');
+            
+            // Load content
+            $('#grid').load(url, function() {
+                // Remove loading state
+                $('.grid').removeClass('loading');
+                
+                // Update active category
+                $('.category-card').removeClass('active');
+                $(`.category-card[data-category-id="${categoryId}"]`).addClass('active');
+            });
+            
+            // Add smooth scroll to top when switching categories
+            $('html, body').animate({scrollTop: 0}, 300);
+        });
+    </script>
+}
+
+

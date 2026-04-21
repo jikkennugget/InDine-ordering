@@ -1,0 +1,31 @@
+@model RegisterAdminVM
+
+@{
+    ViewBag.Title = "Account | Register Admin";
+}
+
+<form class="form" method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <label asp-for="Email"></label>
+    <input asp-for="Email" autofocus>
+    <span asp-validation-for="Email"></span>
+
+    <label asp-for="Password"></label>
+    <input asp-for="Password">
+    <span asp-validation-for="Password"></span>
+
+    <label asp-for="Confirm"></label>
+    <input asp-for="Confirm">
+    <span asp-validation-for="Confirm"></span>
+
+    <label asp-for="Name"></label>
+    <input asp-for="Name">
+    <span asp-validation-for="Name"></span>
+
+    <section>
+        <button>Register Admin</button>
+        <button type="reset">Reset</button>
+    </section>
+</form>
+

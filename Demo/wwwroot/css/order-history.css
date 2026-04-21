@@ -1,0 +1,12 @@
+.order-card{background:#fff;border:0;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.06);padding:16px;margin:12px 0}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.order-info{font-size:14px;color:#6b7280}
+.order-items{margin-top:8px}
+.order-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e5e7eb}
+.order-total{font-weight:700;font-size:16px;margin-top:8px;padding-top:8px;border-top:2px solid #111827}
+.status-paid{color:#16a34a;font-weight:700}
+.status-unpaid{color:#d9232e;font-weight:700}
+.btn-primary{background:#d9232e;color:#fff;border:none;padding:8px 12px;border-radius:10px}
+.btn-primary:hover{background:#b81d25}
+.btn-ghost{background:transparent;border:1px solid #e5e7eb;padding:8px 12px;border-radius:10px;color:#374151}
+

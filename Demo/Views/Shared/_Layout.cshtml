@@ -1,0 +1,93 @@
+﻿@inject DB db
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" href="/images/favicon.png">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="/css/pager.css">
+    <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
+    @RenderSection("head", false)
+</head>
+<body>
+    <div class="info">@Html.Raw(TempData["Info"])</div>
+
+    <header>
+        <h1>
+            @if (User.IsInRole("Admin"))
+            {
+                <a href="/Product/Maintain"><text>Admin Page</text></a>
+            }
+            else if (User.IsInRole("Staff"))
+            {
+                <a href="/Product/TakeOrder"><text>Staff Page</text></a>
+            }
+            else
+            {
+                <a href="/"><text>Simple Shopping Cart</text></a>
+            }
+        </h1>
+
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <div>
+                @User.Identity.Name |
+                @(User.IsInRole("Admin")  ? "Admin"  : "")
+                @(User.IsInRole("Staff") ? "Staff" : "")
+            </div>
+        }
+
+        @if (User.IsInRole("Staff"))
+        {
+            var photoURL = db.Staff.Find(User.Identity!.Name)!.PhotoURL;
+            <img src="/photos/@photoURL">
+        }
+    </header>
+
+    <nav>
+        @if (User.IsInRole("Staff"))
+        {
+            <a href="/Product/TakeOrder">🍽️ Take Order</a>
+            <a href="/Product/ShoppingCart">🛒 View Cart</a>
+            <a href="/Product/Order">📋 Order History</a>
+        }
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="/Product/Maintain">🏷️ Menu Maintenance</a>
+            <a href="/Product/Order">📋 Order History</a>
+        }
+
+        <div></div>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a href="/Account/Logout">Logout</a>
+            <a href="/Account/UpdatePassword">Update Password</a>
+        }
+        @if (User.IsInRole("Staff"))
+        {
+            <a href="/Account/UpdateProfile">Update Profile</a>
+        }
+    </nav>
+
+    <main>
+        <h1>@ViewBag.Title</h1>
+        @RenderBody()
+    </main>
+
+    <footer>
+        Developed by <b>BAE SUZY</b> &middot;
+        Copyrighted &copy; @DateTime.Today.Year
+    </footer>
+
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="/js/jquery.validate.min.js"></script>
+    <script src="/js/jquery.validate.unobtrusive.min.js"></script>
+    <script src="/js/app.js" asp-append-version="true"></script>
+    @RenderSection("foot", false)
+</body>
+</html>

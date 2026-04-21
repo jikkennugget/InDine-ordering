@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Product";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/product-index.css" asp-append-version="true">
+}
+
+@{
+    var cart = ViewBag.Cart as Dictionary<string,int> ?? new Dictionary<string,int>();
+    var cartCount = cart.Sum(kv => kv.Value);
+}
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 14px 0;">
+    <div style="font-weight:bold;">Cart: @cartCount item@(cartCount==1?"":"s")</div>
+    <div>
+        <a href="/Product/ShoppingCart" class="btn">View Cart / Checkout</a>
+    </div>
+    </div>
+
+<div id="target">
+    <partial name="_Index">
+</div>
+
+@section foot {
+    <script>
+        // Submit when quantity select changes
+        $(document).on('change', '.cart-form select[name="Quantity"]', function () {
+            $(this).closest('form').submit();
+        });
+
+        // Increment / decrement buttons
+        $(document).on('click', '.btn-plus, .btn-minus', function () {
+            const form = $(this).closest('form');
+            const sel = form.find('select[name="Quantity"]');
+            let v = parseInt(sel.val() || '0', 10);
+            if ($(this).hasClass('btn-plus')) v = Math.min(10, v + 1);
+            if ($(this).hasClass('btn-minus')) v = Math.max(0, v - 1);
+            sel.val(v.toString());
+            form.submit();
+        });
+    </script>
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <div style="margin-top:15px">
+        <a href="/Product/Create?categoryId=@ViewBag.CategoryId" class="btn">Create Product</a>
+        <form method="post" action="/Product/ResetProducts" style="display:inline; margin-left:10px">
+            <button type="submit" class="btn" onclick="return confirm('Delete ALL products and order lines?')">Delete All Products</button>
+        </form>
+    </div>
+}

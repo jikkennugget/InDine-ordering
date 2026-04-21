@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Product>
+
+@{
+    Dictionary<string, int> cart = ViewBag.Cart;
+}
+
+<div class="products">
+    @foreach (var p in Model)
+    {
+        <div class="product">
+            <form class="cart-form ctrl" data-ajax="true"
+                  data-ajax-update="#target"
+                  method="post"
+                  action="/Product/UpdateCart">
+                @{
+                    var quantity = 0;
+                    if (cart.ContainsKey(p.Id))
+                    {
+                        quantity = cart[p.Id];
+                        <span>✅</span>
+                    }
+                    var list = new SelectList(Enumerable.Range(0, 11), quantity);
+                }
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <button type="button" class="btn btn-minus" style="padding:2px 6px;">-</button>
+                    @Html.DropDownList("Quantity", list, new { @style = "min-width:60px;" })
+                    <button type="button" class="btn btn-plus" style="padding:2px 6px;">+</button>
+                </div>
+                @Html.Hidden("ProductId", p.Id)
+            </form>
+            <img src="@Url.Content(p.PhotoURL.StartsWith("~/") ? p.PhotoURL : $"~/products/{p.PhotoURL}")" 
+                 alt="@p.Name" 
+                 onerror="this.src='@Url.Content("~/images/photo.jpg")'; this.alt='No image available';">
+            <div class="meta">
+                <span class="name">@p.Name</span>
+                <span class="price">RM @p.Price</span>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div style="margin-top:6px">
+                        <a href="/Product/Edit/@p.Id" class="btn">Edit</a>
+                        <form method="post" action="/Product/Delete" style="display:inline">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="btn" onclick="return confirm('Delete this product?')">Delete</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

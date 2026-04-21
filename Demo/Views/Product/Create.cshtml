@@ -1,0 +1,181 @@
+@model Product
+
+@{
+    ViewBag.Title = "Create Product";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/create-product.css" asp-append-version="true">
+}
+
+<div class="create-product-container">
+    <div class="create-product-header">
+        <h2>Create New Product</h2>
+        <p>Add a new product to your menu</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="create-product-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="form-grid">
+            <!-- Category Selection -->
+            <div class="form-group">
+                <label asp-for="CategoryId" class="form-label">
+                    <span class="label-icon">📂</span>
+                    Category
+                </label>
+                <select asp-for="CategoryId" asp-items="new SelectList((IEnumerable<ProductCategory>)ViewBag.Categories, nameof(ProductCategory.Id), nameof(ProductCategory.Name))" class="form-select">
+                    <option value="">Select a category...</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="field-validation-error"></span>
+            </div>
+
+            <!-- Product ID -->
+            <div class="form-group">
+                <label asp-for="Id" class="form-label">
+                    <span class="label-icon">🏷️</span>
+                    Product ID
+                </label>
+                <input asp-for="Id" placeholder="e.g., P001" class="form-input" />
+                <span asp-validation-for="Id" class="field-validation-error"></span>
+                <small class="form-help">4 characters (e.g., P001, P002)</small>
+            </div>
+
+            <!-- Product Name -->
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">
+                    <span class="label-icon">📝</span>
+                    Product Name
+                </label>
+                <input asp-for="Name" placeholder="Enter product name" class="form-input" />
+                <span asp-validation-for="Name" class="field-validation-error"></span>
+            </div>
+
+            <!-- Price -->
+            <div class="form-group">
+                <label asp-for="Price" class="form-label">
+                    <span class="label-icon">💰</span>
+                    Price (RM)
+                </label>
+                <input asp-for="Price" placeholder="0.00" step="0.01" min="0" class="form-input" />
+                <span asp-validation-for="Price" class="field-validation-error"></span>
+            </div>
+
+            <!-- Photo Upload -->
+            <div class="form-group photo-upload-group">
+                <label class="form-label">
+                    <span class="label-icon">📸</span>
+                    Product Photo
+                </label>
+                <div class="photo-upload-container">
+                    <div class="photo-upload-area" id="photoUploadArea">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">
+                            <strong>Click to upload photo</strong>
+                            <span>or drag and drop</span>
+                        </div>
+                        <div class="upload-formats">JPG, PNG up to 100MB</div>
+                    </div>
+                    <input type="file" name="photoFile" accept="image/jpeg,image/png" required class="photo-input" id="photoInput" />
+                    <div class="photo-preview" id="photoPreview" style="display: none;">
+                        <img id="previewImage" src="" alt="Preview" />
+                        <button type="button" class="remove-photo" id="removePhoto">✕</button>
+                    </div>
+                </div>
+                <span class="field-validation-error" id="photoError"></span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <span class="btn-icon">✨</span>
+                Create Product
+            </button>
+            <a href="/Product/Maintain" class="btn btn-secondary">
+                <span class="btn-icon">↩️</span>
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section foot {
+    <script>
+        // Photo upload preview functionality
+        const photoInput = document.getElementById('photoInput');
+        const photoUploadArea = document.getElementById('photoUploadArea');
+        const photoPreview = document.getElementById('photoPreview');
+        const previewImage = document.getElementById('previewImage');
+        const removePhoto = document.getElementById('removePhoto');
+        const photoError = document.getElementById('photoError');
+
+        // Click to upload
+        photoUploadArea.addEventListener('click', () => {
+            photoInput.click();
+        });
+
+        // Drag and drop
+        photoUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            photoUploadArea.classList.add('drag-over');
+        });
+
+        photoUploadArea.addEventListener('dragleave', () => {
+            photoUploadArea.classList.remove('drag-over');
+        });
+
+        photoUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            photoUploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        photoInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Remove photo
+        removePhoto.addEventListener('click', (e) => {
+            e.stopPropagation();
+            photoInput.value = '';
+            photoUploadArea.style.display = 'flex';
+            photoPreview.style.display = 'none';
+            photoError.textContent = '';
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                photoError.textContent = 'Please select a JPG or PNG image.';
+                return;
+            }
+
+            // Validate file size (100MB)
+            if (file.size > 100 * 1024 * 1024) {
+                photoError.textContent = 'File size must be less than 100MB.';
+                return;
+            }
+
+            // Clear any previous errors
+            photoError.textContent = '';
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                photoUploadArea.style.display = 'none';
+                photoPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+}
+
+

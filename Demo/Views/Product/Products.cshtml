@@ -1,0 +1,48 @@
+@model IEnumerable<Product>
+
+@{
+    ViewBag.Title = "All Products";
+}
+
+<h2>All Products</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Photo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Id</td>
+            <td>@p.Name</td>
+            <td>RM @p.Price</td>
+            <td>@p.CategoryId @(" - "+ (p.Category?.Name ?? ""))</td>
+            <td>
+                <img src="@Url.Content(p.PhotoURL.StartsWith("~/") ? p.PhotoURL : $"~/products/{p.PhotoURL}")" alt="@p.Name" style="height:40px;" onerror="this.src='@Url.Content("~/images/photo.jpg")';">
+            </td>
+            <td>
+                <a href="/Product/Edit/@p.Id" class="btn">Edit</a>
+                <form method="post" action="/Product/Delete" style="display:inline">
+                    <input type="hidden" name="id" value="@p.Id" />
+                    <button type="submit" class="btn" onclick="return confirm('Delete this product?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+    </table>
+
+<div style="margin-top:15px">
+    <a href="/Product/Index" class="btn">Back</a>
+    <a href="/Product/Create" class="btn">Create Product</a>
+</div>
+
+

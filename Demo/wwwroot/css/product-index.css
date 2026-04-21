@@ -1,0 +1,25 @@
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;margin-bottom:20px}
+.product{background:#fff;border:0;border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.08);position:relative;overflow:hidden;transition:all 0.3s ease}
+.product:hover{transform:translateY(-4px);box-shadow:0 12px 35px rgba(0,0,0,.15)}
+
+.product-image-container{position:relative;overflow:hidden}
+.product img{display:block;width:100%;height:180px;object-fit:cover;transition:transform 0.3s ease}
+.product:hover img{transform:scale(1.05)}
+
+.product-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:opacity 0.3s ease}
+.product:hover .product-overlay{opacity:1}
+
+.btn-overlay{background:rgba(255,255,255,0.9);color:#333;border:none;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:16px;transition:all 0.2s ease;display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px}
+.btn-overlay:hover{background:#fff;transform:scale(1.1);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+
+.product .meta{padding:16px 20px}
+.product .meta .product-id{font-size:12px;color:#64748b;margin-bottom:4px;font-weight:500}
+.product .meta .name{display:block;font-weight:600;color:#1e293b;font-size:16px;margin-bottom:6px}
+.product .meta .category-id{font-size:12px;color:#64748b;margin-bottom:8px;font-weight:500}
+.product .meta .price{color:#d9232e;font-weight:700;font-size:18px}
+
+.product .ctrl{position:absolute;right:12px;top:12px;background:rgba(0,0,0,.7);color:#fff;border-radius:12px;padding:8px;backdrop-filter:blur(10px)}
+
+.btn{background:linear-gradient(135deg, #d9232e 0%, #b81d25 100%);color:#fff;border:none;padding:10px 16px;border-radius:10px;font-weight:600;transition:all 0.2s ease;text-decoration:none;display:inline-block}
+.btn:hover{background:linear-gradient(135deg, #b81d25 0%, #991b1f 100%);transform:translateY(-1px);box-shadow:0 4px 12px rgba(217,35,46,0.3)}
+

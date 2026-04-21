@@ -1,0 +1,15 @@
+﻿P001	Banana	1.00	banana.jpg
+P002	Cherries	2.00	cherries.jpg
+P003	Grapes	3.00	grapes.jpg
+P004	Green Apple	4.00	green-apple.jpg
+P005	Kiwi	5.00	kiwi.jpg
+P006	Lemon	6.00	lemon.jpg
+P007	Mango	7.00	mango.jpg
+P008	Melon	8.00	melon.jpg
+P009	Orange	9.00	orange.jpg
+P010	Peach	10.00	peach.jpg
+P011	Pear	11.00	pear.jpg
+P012	Pineapple	12.00	pineapple.jpg
+P013	Red Apple	13.00	red-apple.jpg
+P014	Strawberry	14.00	strawberry.jpg
+P015	Watermelon	15.00	watermelon.jpg

@@ -1,0 +1,26 @@
+@model ProductCategory
+
+@{
+    ViewBag.Title = "Create Category";
+}
+
+<form method="post">
+    <div class="form">
+        <div>
+            <label>Id</label>
+            <input asp-for="Id" placeholder="C001" />
+            <span asp-validation-for="Id" class="text-danger"></span>
+        </div>
+        <div>
+            <label>Name</label>
+            <input asp-for="Name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div>
+            <button type="submit" class="btn">Create</button>
+            <a href="/Product/Maintain" class="btn">Cancel</a>
+        </div>
+    </div>
+</form>
+
+ 

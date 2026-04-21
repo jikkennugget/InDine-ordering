@@ -1,0 +1,203 @@
+﻿@model IEnumerable<CartItem>
+
+@if (Model.Any())
+{
+    <div class="cart-items-list">
+        @foreach (CartItem i in Model)
+        {
+            var list = new SelectList(Enumerable.Range(1, 10), i.Quantity);
+            
+            <div class="cart-item">
+                <div class="item-image">
+                    <img src="@Url.Content(i.Product.PhotoURL.StartsWith("~/") ? i.Product.PhotoURL : $"~/products/{i.Product.PhotoURL}")" alt="@i.Product.Name">
+                </div>
+                <div class="item-details">
+                    <h4 class="item-name">@i.Product.Name</h4>
+                    <p class="item-price">RM @i.Product.Price.ToString("F2")</p>
+                </div>
+                <div class="item-quantity">
+                    <form data-ajax="true"
+                          data-ajax-update="#target"
+                          method="post"
+                          action="/Product/UpdateCart"
+                          class="quantity-form">
+                        @Html.DropDownList("Quantity", list, new { @class = "quantity-select" })
+                        @Html.Hidden("ProductId", i.Product.Id)
+                    </form>
+                </div>
+                <div class="item-subtotal">
+                    <span class="subtotal-amount">RM @i.Subtotal.ToString("F2")</span>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Add some delicious items to get started!</p>
+        <a href="/Product/TakeOrder" class="btn-continue" style="display: inline-block; margin-top: 16px;">Start Ordering</a>
+    </div>
+}
+
+<style>
+    .cart-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+        .cart-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto auto;
+            gap: 16px;
+            align-items: center;
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cart-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d9232e, #ffce00);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-item:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .cart-item:hover {
+            border-color: #d9232e;
+            box-shadow: 0 8px 25px rgba(217,35,46,0.15);
+            transform: translateY(-2px);
+        }
+    
+    .item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-details {
+        flex: 1;
+    }
+    
+    .item-name {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .item-price {
+        margin: 0;
+        font-size: 14px;
+        color: #64748b;
+    }
+    
+    .item-quantity {
+        display: flex;
+        align-items: center;
+    }
+    
+    .quantity-form {
+        margin: 0;
+    }
+    
+        .quantity-select {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 60px;
+        }
+        
+        .quantity-select:focus {
+            outline: none;
+            border-color: #d9232e;
+            box-shadow: 0 0 0 3px rgba(217, 35, 46, 0.1);
+        }
+        
+        .quantity-select:hover {
+            border-color: #d9232e;
+        }
+    
+    .item-subtotal {
+        text-align: right;
+    }
+    
+    .subtotal-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+    
+    .empty-cart-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+    
+    .empty-cart h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: #475569;
+    }
+    
+    .empty-cart p {
+        margin-bottom: 24px;
+    }
+    
+    @@media (max-width: 768px) {
+        .cart-item {
+            grid-template-columns: 60px 1fr;
+            grid-template-rows: auto auto;
+            gap: 12px;
+        }
+        
+        .item-image {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .item-quantity {
+            grid-column: 1 / -1;
+            justify-self: start;
+        }
+        
+        .item-subtotal {
+            grid-column: 1 / -1;
+            justify-self: end;
+        }
+    }
+</style>

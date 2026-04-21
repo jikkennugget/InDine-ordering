@@ -1,0 +1,354 @@
+﻿@{
+    ViewBag.Title = "View Cart - Create Order";
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/product-index.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/maintain.css" asp-append-version="true">
+    <style>
+        .cart-maintain {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .cart-items-section {
+            background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,.1);
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+        
+        .cart-items-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d9232e, #ffce00);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .cart-header {
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 16px;
+            position: relative;
+        }
+        
+        .cart-header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, #d9232e, #ffce00);
+            border-radius: 2px;
+        }
+        
+        .order-summary-section {
+            background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,.1);
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+            height: fit-content;
+        }
+        
+        .order-summary-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d9232e, #ffce00);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .summary-header {
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 16px;
+            position: relative;
+        }
+        
+        .summary-header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, #d9232e, #ffce00);
+            border-radius: 2px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-row.total {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1e293b;
+            padding: 16px 0;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 8px;
+        }
+        
+        .summary-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .summary-value {
+            color: #1e293b;
+            font-weight: 600;
+        }
+        
+        .create-order-card {
+            margin-top: 20px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .create-order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d9232e, #ffce00);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .create-order-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .create-order-card:hover {
+            border-color: #d9232e;
+            box-shadow: 0 8px 25px rgba(217,35,46,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .create-order-header {
+            margin-bottom: 16px;
+        }
+        
+        .create-order-header h4 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 16px;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        
+        .create-order-card:hover .create-order-header h4 {
+            color: #d9232e;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #d9232e;
+            box-shadow: 0 0 0 3px rgba(217, 35, 46, 0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-continue {
+            flex: 1;
+            padding: 12px 16px;
+            background: #6b7280;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-continue:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+        
+        .btn-create {
+            flex: 1;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #d9232e 0%, #b81d25 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(217, 35, 46, 0.3);
+        }
+        
+        .btn-create:hover {
+            background: linear-gradient(135deg, #b81d25 0%, #991b1f 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(217, 35, 46, 0.4);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .empty-cart-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-cart h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #475569;
+        }
+        
+        .empty-cart p {
+            margin-bottom: 24px;
+        }
+        
+        @@media (max-width: 768px) {
+            .cart-maintain {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 0 16px;
+            }
+        }
+    </style>
+}
+
+<div class="cart-maintain">
+    <div class="cart-items-section">
+        <h3 class="cart-header">🛒 Your Cart</h3>
+        <partial name="_ShoppingCart">
+    </div>
+    
+    <div class="order-summary-section">
+        <h3 class="summary-header">Order Summary</h3>
+        
+        <div class="summary-row total">
+            <span class="summary-label">Total</span>
+            <span class="summary-value" id="sum-total">RM 0.00</span>
+        </div>
+        
+        <div class="create-order-card">
+            <div class="create-order-header">
+                <h4>📝 Create Order</h4>
+            </div>
+            <form method="post" action="/Product/CreateOrder" id="order-form">
+                <div class="form-group">
+                    <label for="tableNumber" class="form-label">Table Number</label>
+                    <input type="text" id="tableNumber" name="tableNumber" placeholder="Enter table number (e.g., T01, T02)" required class="form-input">
+                </div>
+                <div class="action-buttons">
+                    <a href="/Product/TakeOrder" class="btn-continue">Continue Ordering</a>
+                    <button type="submit" class="btn-create">Create Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section foot {
+    <script>
+        $(document).on('change', 'select', e => {
+            $(e.target.form).submit()
+        });
+
+        // Function to update order summary
+        function updateOrderSummary() {
+            let totalAmount = 0;
+
+            // Calculate totals from cart items and update individual subtotals
+            $('.cart-item').each(function() {
+                const quantity = parseInt($(this).find('.quantity-select').val()) || 0;
+                const priceText = $(this).find('.item-price').text();
+                const price = parseFloat(priceText.replace('RM ', '')) || 0;
+                const subtotal = price * quantity;
+                
+                // Update the subtotal display for this item
+                $(this).find('.subtotal-amount').text('RM ' + subtotal.toFixed(2));
+                
+                totalAmount += subtotal;
+            });
+
+            // Update only the total in order summary
+            $('#sum-total').text('RM ' + totalAmount.toFixed(2));
+        }
+
+        // Update summary when page loads
+        $(document).ready(function() {
+            updateOrderSummary();
+        });
+
+        // Update summary when cart changes (after AJAX form submission)
+        $(document).ajaxComplete(function() {
+            updateOrderSummary();
+        });
+    </script>
+}

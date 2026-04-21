@@ -1,0 +1,455 @@
+@model IEnumerable<Product>
+
+@{
+    ViewBag.Title = "Take Order";
+    var categories = (IEnumerable<ProductCategory>)ViewBag.Categories;
+    string selected = (string)ViewBag.CategoryId;
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/product-index.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/maintain.css" asp-append-version="true">
+    <style>
+        .quantity-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+        .quantity-controls {
+            transition: all 0.2s ease;
+        }
+        .product:hover .quantity-controls {
+            transform: scale(1.05);
+        }
+        
+        /* Enhanced category card styling */
+        .category-card {
+            text-decoration: none !important;
+            color: inherit !important;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .category-card:hover {
+            text-decoration: none !important;
+            color: inherit !important;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+            border-color: #cbd5e1 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-card:visited {
+            text-decoration: none !important;
+            color: inherit !important;
+        }
+        
+        /* Active category styling - stays in hover state */
+        .category-card.active {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+            border-color: #cbd5e1 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-card.active .category-name {
+            color: #1e293b !important;
+            font-weight: 600;
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            z-index: 10000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+            min-width: 300px;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+        
+        .toast-icon {
+            font-size: 20px;
+        }
+        
+        .toast-message {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+        
+        .toast-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Disabled button state */
+        .add-to-cart-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .add-to-cart-btn:disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Search input styling */
+        #search-input:focus {
+            outline: none;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        #search-btn:hover {
+            color: #3b82f6 !important;
+        }
+        
+        /* Loading state for search */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .loading::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+        
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive toast design */
+        @@media (max-width: 768px) {
+            .toast {
+                left: 20px;
+                right: 20px;
+                transform: translateY(-100px);
+                max-width: none;
+                min-width: auto;
+            }
+            
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive search section */
+        @@media (max-width: 768px) {
+            .search-section {
+                padding: 16px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .search-section > div {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            
+            .search-section input {
+                max-width: none !important;
+            }
+            
+            .search-section button {
+                width: 100% !important;
+            }
+        }
+    </style>
+}
+
+<!-- Global Search Section -->
+<div class="search-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #cbd5e1;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 16px;">
+        <div style="position: relative; flex: 1; max-width: 400px;">
+            <input type="text" id="search-input" placeholder="Search all menu items..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; transition: all 0.2s ease; background: white;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            <button type="button" id="search-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px; font-size: 16px;" title="Search">
+                🔍
+            </button>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; margin-top: 12px;">
+        <button type="button" id="clear-search" style="padding: 10px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            Clear Search
+        </button>
+    </div>
+</div>
+
+<div class="maintain">
+    <aside class="sidebar">
+        <h3>Menu Categories</h3>
+        <ul>
+            @foreach (var c in categories)
+            {
+                var isActive = string.Equals(c.Id, selected, StringComparison.OrdinalIgnoreCase);
+                <li>
+                    <a href="/Product/TakeOrder?categoryId=@c.Id" class="category-card @(isActive ? "active" : "")" style="text-decoration: none; color: inherit; display: block;">
+                        <div class="category-info">
+                            <div class="category-name">
+                                @c.Name
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+    </aside>
+
+    <section class="grid">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h4 style="margin:0; color:#1e293b; font-size:18px; font-weight:600;">Menu Items</h4>
+        </div>
+        <div id="grid">
+            <partial name="_TakeOrderGrid" />
+        </div>
+    </section>
+</div>
+
+<!-- Toast notification container -->
+<div id="toast-container"></div>
+
+@section foot {
+    <script>
+        // Toast notification functions
+        function showToast(message, type = 'success') {
+            const toastContainer = $('#toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const icon = type === 'success' ? '✅' : '❌';
+            const toastClass = type === 'success' ? 'toast' : 'toast error';
+            
+            const toastHtml = `
+                <div id="${toastId}" class="${toastClass}">
+                    <span class="toast-icon">${icon}</span>
+                    <span class="toast-message">${message}</span>
+                    <button class="toast-close" onclick="hideToast('${toastId}')">×</button>
+                </div>
+            `;
+            
+            toastContainer.append(toastHtml);
+            
+            // Show toast with animation
+            setTimeout(() => {
+                $(`#${toastId}`).addClass('show');
+            }, 100);
+            
+            // Auto-hide after 4 seconds
+            setTimeout(() => {
+                hideToast(toastId);
+            }, 4000);
+        }
+        
+        function hideToast(toastId) {
+            const toast = $(`#${toastId}`);
+            toast.removeClass('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 400);
+        }
+
+        // Ajax-load grid when clicking category links with loading state
+        $(document).on('click', 'a[href^="/Product/TakeOrder?categoryId="]', function (e) {
+            const url = $(this).attr('href');
+            const clickedCard = $(this);
+            if (!url) return;
+            e.preventDefault();
+            
+            // Add loading state
+            $('.grid').addClass('loading');
+            
+            // Update active category immediately
+            $('.category-card').removeClass('active');
+            clickedCard.addClass('active');
+            
+            // Load content
+            $('#grid').load(url, function() {
+                // Remove loading state
+                $('.grid').removeClass('loading');
+            });
+        });
+        
+        // Add smooth scroll to top when switching categories
+        $(document).on('click', 'a[href^="/Product/TakeOrder?categoryId="]', function() {
+            $('html, body').animate({scrollTop: 0}, 300);
+        });
+
+
+
+        // Quantity controls
+        $(document).on('click', '.quantity-btn', function() {
+            const productId = $(this).data('product-id');
+            const action = $(this).data('action');
+            const quantityDisplay = $(`.quantity-display[data-product-id="${productId}"]`);
+            let currentQuantity = parseInt(quantityDisplay.text()) || 0;
+            
+            if (action === 'increase') {
+                currentQuantity++;
+            } else if (action === 'decrease' && currentQuantity > 0) {
+                currentQuantity--;
+            }
+            
+            quantityDisplay.text(currentQuantity);
+        });
+
+        // Add to cart button
+        $(document).on('click', '.add-to-cart-btn', function() {
+            const productId = $(this).data('product-id');
+            const quantityDisplay = $(`.quantity-display[data-product-id="${productId}"]`);
+            const quantity = parseInt(quantityDisplay.text()) || 0;
+            const button = $(this);
+            
+            if (quantity === 0) {
+                showToast('Please select a quantity first using the +/- buttons.', 'error');
+                return;
+            }
+            
+            // Disable button during request
+            button.prop('disabled', true).text('Adding...');
+            
+            // Add the selected quantity to cart in a single call
+            $.post('/Product/AddToCart', { id: productId, quantity: quantity }, function(response) {
+                if (response.success) {
+                    // Reset quantity to 0 after adding to cart
+                    quantityDisplay.text('0');
+                    
+                    // Show success message
+                    const itemName = button.closest('.product').find('.name').text();
+                    const quantityText = quantity === 1 ? '1 item' : `${quantity} items`;
+                    showToast(`Successfully added ${quantityText} of ${itemName} to cart!`);
+                    
+                    // Reset button
+                    button.prop('disabled', false).text('Add to Cart');
+                } else {
+                    // Show error message
+                    showToast('Error adding to cart: ' + (response.error || 'Unknown error'), 'error');
+                    button.prop('disabled', false).text('Add to Cart');
+                }
+            }.bind(this)).fail(function() {
+                showToast('Failed to add item to cart. Please try again.', 'error');
+                button.prop('disabled', false).text('Add to Cart');
+            });
+        });
+
+        // Search functionality
+        let searchTimeout;
+        
+        // Search input event handler
+        $('#search-input').on('input', function() {
+            const searchTerm = $(this).val().trim();
+            
+            // Clear previous timeout
+            clearTimeout(searchTimeout);
+            
+            // Debounce search - wait 300ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                performSearch(searchTerm);
+            }, 300);
+        });
+        
+        // Search button click
+        $('#search-btn').on('click', function() {
+            const searchTerm = $('#search-input').val().trim();
+            performSearch(searchTerm);
+        });
+        
+        // Enter key in search input
+        $('#search-input').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                const searchTerm = $(this).val().trim();
+                performSearch(searchTerm);
+            }
+        });
+        
+        // Clear search button
+        $('#clear-search').on('click', function() {
+            $('#search-input').val('');
+            clearSearch();
+        });
+        
+        // Perform search function
+        function performSearch(searchTerm) {
+            if (searchTerm.length === 0) {
+                clearSearch();
+                return;
+            }
+            
+            // Add loading state
+            $('#grid').html('<div class="loading">Searching all menu items...</div>');
+            
+            // Perform AJAX search across all products
+            $.get('/Product/SearchProducts', { searchTerm: searchTerm }, function(data) {
+                $('#grid').html(data);
+            }).fail(function() {
+                $('#grid').html('<div class="empty-state"><h4>Search Error</h4><p>Failed to search products. Please try again.</p></div>');
+            });
+        }
+        
+        // Clear search function
+        function clearSearch() {
+            $('#search-input').val('');
+            
+            // Reload the current category or show all products
+            const currentCategory = $('.category-card.active').attr('href');
+            if (currentCategory) {
+                $('#grid').load(currentCategory);
+            } else {
+                // If no category is selected, load all products
+                $('#grid').load('/Product/TakeOrder');
+            }
+        }
+
+        // Initialize page
+        $(function() {
+            // Page is ready
+        });
+    </script>
+}

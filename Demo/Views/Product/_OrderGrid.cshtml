@@ -1,0 +1,162 @@
+@model IEnumerable<Order>
+
+@{
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+    var totalCount = (int)ViewBag.TotalCount;
+    var pageSize = (int)ViewBag.PageSize;
+    var status = ViewBag.Status as string;
+    var hasPreviousPage = (bool)ViewBag.HasPreviousPage;
+    var hasNextPage = (bool)ViewBag.HasNextPage;
+}
+
+@if (Model.Any())
+{
+    <div class="products">
+        @foreach (var order in Model)
+        {
+            <div class="product">
+                <div class="product-image-container">
+                    <div class="product-overlay">
+                        <a href="/Product/OrderDetail/@order.Id" class="btn-overlay" title="View Details">👁️</a>
+                        @if (!order.Paid)
+                        {
+                            <a href="/Product/Pay/@order.Id" class="btn-overlay" title="Mark as Paid">💰</a>
+                        }
+                        @if (User.IsInRole("Staff") && !order.Paid)
+                        {
+                            <form method="post" action="/Product/CancelOrder" style="display:inline;">
+                                <input type="hidden" name="id" value="@order.Id" />
+                                <button type="submit" class="btn-overlay" onclick="return confirm('Cancel this order?')" title="Cancel Order">❌</button>
+                            </form>
+                        }
+                    </div>
+                    <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 2px solid #e2e8f0;">
+                        <div style="text-align: center; color: #64748b;">
+                            <div style="font-size: 48px; margin-bottom: 8px;">📋</div>
+                            <div style="font-size: 14px; font-weight: 600;">Order #@order.Id</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meta">
+                    <div class="product-id">Order ID: @order.Id</div>
+                    <span class="name">Table @order.TableNumber</span>
+                    <div class="category-id">Status: @(order.Paid ? "PAID" : "UNPAID")</div>
+                    <div class="category-id">Date: @order.Date.ToString("yyyy-MM-dd h:mm tt")</div>
+                    <div class="category-id">Items: @order.OrderLines.Sum(ol => ol.Quantity)</div>
+                    <span class="price">RM @order.OrderLines.Sum(ol => ol.Price * ol.Quantity).ToString("F2")</span>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <!-- Pagination Controls -->
+    
+    <!-- Always show pagination info -->
+    <div class="pagination-container">
+        <div class="pagination-info">
+            <span class="icon"></span>Showing @((currentPage - 1) * pageSize + 1) to @(Math.Min(currentPage * pageSize, totalCount)) of @totalCount orders
+            @if (totalPages > 1)
+            {
+                <span style="display: block; font-size: 13px; margin-top: 6px; opacity: 0.7; font-weight: 400;">
+                    Page @currentPage of @totalPages
+                </span>
+            }
+        </div>
+        
+        @if (totalPages > 1)
+        {
+            var startPage = Math.Max(1, currentPage - 2);
+            var endPage = Math.Min(totalPages, currentPage + 2);
+            
+            <nav class="pagination-nav">
+                <ul class="pagination">
+                    <!-- Previous Page -->
+                    @if (hasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="@(currentPage - 1)" data-status="@status">
+                                <span>&laquo;</span> Previous
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link disabled">
+                                <span>&laquo;</span> Previous
+                            </span>
+                        </li>
+                    }
+                    
+                    <!-- Page Numbers -->
+                    
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="1" data-status="@status">1</a>
+                        </li>
+                        @if (startPage > 2)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                    }
+                    
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            @if (i == currentPage)
+                            {
+                                <span class="page-link active">@i</span>
+                            }
+                            else
+                            {
+                                <a href="#" class="page-link pagination-link" data-page="@i" data-status="@status">@i</a>
+                            }
+                        </li>
+                    }
+                    
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="@totalPages" data-status="@status">@totalPages</a>
+                        </li>
+                    }
+                    
+                    <!-- Next Page -->
+                    @if (hasNextPage)
+                    {
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="@(currentPage + 1)" data-status="@status">
+                                Next <span>&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link disabled">
+                                Next <span>&raquo;</span>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <h4>No orders found</h4>
+        <p>There are no orders matching the selected criteria.</p>
+    </div>
+}

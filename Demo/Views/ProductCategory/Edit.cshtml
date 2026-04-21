@@ -1,0 +1,26 @@
+@model ProductCategory
+
+@{
+    ViewBag.Title = "Edit Category";
+}
+
+<form method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form">
+        <div>
+            <label>Id</label>
+            <input asp-for="Id" disabled />
+        </div>
+        <div>
+            <label>Name</label>
+            <input asp-for="Name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div>
+            <button type="submit" class="btn">Save</button>
+            <a href="/Product/Maintain" class="btn">Cancel</a>
+        </div>
+    </div>
+</form>
+
+ 

@@ -1,0 +1,30 @@
+@{
+    ViewBag.Title = "Product Test Page";
+}
+
+<h2>Product System Test</h2>
+
+<div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd;">
+    <h3>Direct Product Page Links (for testing):</h3>
+    <p><a href="/Product/Index?categoryId=C001" class="btn">Food Products (C001)</a></p>
+    <p><a href="/Product/Index?categoryId=C002" class="btn">Beverage Products (C002)</a></p>
+    <p><a href="/Product/Index?categoryId=C003" class="btn">Dessert Products (C003)</a></p>
+</div>
+
+<div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd;">
+    <h3>Other Pages:</h3>
+    <p><a href="/" class="btn">Home Page</a></p>
+    <p><a href="/Product/Order" class="btn">Order History</a></p>
+    <p><a href="/Product/ShoppingCart" class="btn">Shopping Cart</a></p>
+    <p><a href="/ProductCategory/Index" class="btn">Product Categories Management</a></p>
+</div>
+
+<div style="margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9;">
+    <h3>Troubleshooting Steps:</h3>
+    <ol>
+        <li>Run the <code>CheckAndFixDatabase.sql</code> script in SQL Server Management Studio</li>
+        <li>Try the direct links above to see if product pages work</li>
+        <li>Check if Home page shows the three category cards</li>
+        <li>If still not working, check the Error List in Visual Studio</li>
+    </ol>
+</div>
